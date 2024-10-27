@@ -38,22 +38,22 @@ export const gameContent = {
 	    const {scene, height, width, title} = ctx;
 	    
 	    const choice = await scene.newMenu(0.5*width, 0.5*height, {
-		story: 'Story',
-		arcade: 'Arcade',
+		play: 'Play',
+		learn: 'Learn',
 	    });
 	    return choice;
 	},
-	story: {
+	play: {
 	    0: async ctx => {
 		const {scene, height, width} = ctx;
 		const choice = await scene.newMenu(0.5*width, 0.5*height, {
-		    newGame: 'New Game',
-		    continueGame: 'Continue',
+		    chapter1: 'Chapter 1',
+		    chapter2: 'Chapter 2',
 		    '..': 'Back',
 		});
 		return choice;
 	    },
-	    newGame: {
+	    chapter1: {
 		0: async ctx => {
 		    const {scene, height, width} = ctx;
 		    const choice = await scene.newMenu(0.5*width, 0.5*height, {
@@ -153,7 +153,7 @@ export const gameContent = {
 		    }),
 		},
 	    },
-	    continueGame: {
+	    chapter2: {
 		0: async ctx => {
 		    const {scene, height, width} = ctx;
 		    const choice = await scene.newMenu(0.5*width, 0.5*height, {
@@ -163,7 +163,7 @@ export const gameContent = {
 		},
 	    },
 	},
-	arcade: {
+	learn: {
 	    0: async ctx => {
 		const {scene, height, width} = ctx;
 		const choice = await scene.newMenu(0.5*width, 0.5*height, {
