@@ -12,13 +12,13 @@ export const gameContent = {
 	const {scene} = ctx;
 	
 	await scene.loadAssets({
-	    red: 'assets/red.svg',
-	    gray: 'assets/gray.svg',
-	    gold: 'assets/gold.svg',
-	    sensor: 'assets/sensor.svg',
-	    trofe: 'assets/trofe.png',
-	    eye: 'assets/eye.svg',
-	    brain: 'assets/brain.png',
+	    red: '../assets/red.svg',
+	    gray: '../assets/gray.svg',
+	    gold: '../assets/gold.svg',
+	    sensor: '../assets/sensor.svg',
+	    trofe: '../assets/trofe.png',
+	    eye: '../assets/eye.svg',
+	    brain: '../assets/brain.png',
 	});
 	
 	const {height, width} = scene.game.config;
