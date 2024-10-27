@@ -4,8 +4,6 @@ import { gameContent } from './js/game-content.js';
 import { timeout } from './js/async.js';
 
 async function main() {
-    await timeout(1000);
-    
     const game = createGame({
 	width: window.innerWidth,
 	height: window.innerHeight,
