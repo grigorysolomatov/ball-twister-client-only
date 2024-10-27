@@ -3,6 +3,8 @@ import { StateTree } from './js/state-tree.js';
 import { gameContent } from './js/game-content.js';
 
 async function main() {
+    await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+    
     const game = createGame({
 	width: window.innerWidth,
 	height: window.innerHeight,
