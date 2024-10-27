@@ -328,7 +328,7 @@ export class LevelClassic {
 	});
 	
 	const rewardText = scene
-	      .newText(rewardImage.x, rewardImage.y - 120, 'Success!')
+	      .newText(rewardImage.x, rewardImage.y - 120, 'Success')
 	      .setOrigin(0.5);
 	await rewardText.tween({
 	    alpha: {from: 0, to: 1},
