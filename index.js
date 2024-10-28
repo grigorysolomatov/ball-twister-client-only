@@ -1,9 +1,15 @@
 import { createGame } from './js/wrap-phaser.js';
 import { StateTree } from './js/state-tree.js';
 import { gameContent } from './js/game-content.js';
-import { timeout } from './js/async.js';
 
 async function main() {
+    await new Promise(resolve => WebFont.load({
+	google: {
+	    families: ['Gochi Hand']
+	},
+	active: resolve,
+    }));
+    
     const game = createGame({
 	width: window.innerWidth,
 	height: window.innerHeight,
