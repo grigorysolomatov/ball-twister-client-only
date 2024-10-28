@@ -51,6 +51,7 @@ export const gameContent = {
 		    chapter2: 'Chapter 2',
 		    chapter3: 'Chapter 3',
 		    chapter4: 'Chapter 4',
+		    __space__: '',
 		    '..': 'Back',
 		});
 		return choice;
