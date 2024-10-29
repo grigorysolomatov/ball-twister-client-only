@@ -1,5 +1,5 @@
 import { timeout } from './async.js';
-import { Level } from './level.js';
+// import { Level } from './level.js';
 
 const tuneEntity = entity => {
     entity.tween = async settings => {
@@ -65,7 +65,7 @@ const tuneScene = scene => {
 	const sprite = scene.add.sprite(x, y, key);
 	return tuneEntity(sprite);
     };
-    scene.newLevel = () => new Level().set({scene});
+    // scene.newLevel = () => new Level().set({scene});
     return scene;
 };
 const tuneGame = game => {

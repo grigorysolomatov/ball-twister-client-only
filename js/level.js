@@ -245,8 +245,16 @@ export class LevelClassic {
 	const {scene, eye: eyeImage} = this.external;
 	const {balls, height, width} = this.internal;
 
-	const menuStep = 50;
-	const startXY = [0.5*width, balls[balls.length-1].y + 1.5*menuStep];
+	const menuStep = 50;	
+	const backXY = [0.5*width, 0.9*height];
+	const startXY = [
+	    0.5*width,
+	    Math.min(
+		balls[balls.length-1].y + 1.5*menuStep,
+		0.5*(balls[balls.length-1].y + backXY[1]),
+	    ),
+	]; // const startXY = [0.5*width, balls[balls.length-1].y + 1.5*menuStep];
+	
 	const startButton = scene.newText(...startXY, 'Start').setOrigin(0.5);
 	startButton.tween({
 	    y: {from: height, to: startButton.y},
@@ -256,8 +264,7 @@ export class LevelClassic {
 	});
 
 	await timeout(200);
-
-	const backXY = [0.5*width, 0.9*height];
+	
 	const backButton = scene.newText(...backXY, 'Back').setOrigin(0.5);
 	backButton.tween({
 	    y: {from: height, to: backButton.y},
@@ -391,7 +398,7 @@ export class LevelClassic {
     }
 }
 
-export class Level {
+class Level_DELETE {
     set(dict) {
 	this.external = this.external || {};
 	this.external = {...this.external, ...dict};
