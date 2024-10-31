@@ -1,0 +1,30 @@
+* TODOs
+- Design better levels
+- Vary colors more
+- Multi-color levels
+- Guide solutions using colors?
+
+* Reddit
+I actually liked the concept here. I played through the first chapter and the pacing seemed appropriate: in every level I had to slightly adjust my strategy or learn new detail about the logic of the game. It was in one way cool that the shapes were similar in that level set and might have made it easier to get in but starting the third, fourth, and fifth level, I could not help thinking ”And the next level is…. more straight lines…”
+
+Some cool things I believe having learned from the first levels:
+
+- Lines shapes can be easily be saved (in groups of three) by moving them further if the space is needed for building new shapes. They can be restored back to the correct position afterwards. This will likely be more difficult in later levels which require more complex shapes.
+
+- Every dot can only ever be in spesific spots (black squares or white squares if it would be colored like a check board). This is because turning keeps center dot still, moves ”edges” diagonally, and moves ”corners” two steps. This means filling a spesific goal position is impossible with some of the dots.
+
+- Control close the edge/corners of the board is more difficult because the last row cannot be used to rotate. This means goal locations at the edge is assymterical to other positions and more difficult to fullfil.
+
+- Straight 7 lenght line can be build inside 3x7 area. This means that any (possible) combination of dots / no dots in the central column of 3x7 can be achieved without breaking shapes outside the area. Not sure if it’s the same for edge columns within the 3x7 area.
+
+Some suggestions based on my experience playing the game:
+
+- The shuffle animation was way too long at the start of the level. I don’t want to wait before starting to play. Shorter animation or ability to skip would be needed if you don’t wish to annoit players.
+
+- On similar note: having to click ”Start” button to accept the level felt annoying. Although I suppose it needs to be there if players have to memorize the shape.
+
+- Or perhaps it would be possible to always show the goal shape with for example colored (immovable) outlines for the correct locations. This would let the player to always see their target like in Sokoban.
+
+- ”Days” and ”Chapters” indicate a story line to me but there was none. Why not just ”Levels” / ”Puzzle” and ”Collections” / ”Sets” / ”Groups” etc?
+
+- Not sure if you already have this on later levels but different board shapes could be interesting. Also, for the first tutorial levels, smaller board size would make more sense. The board feels bit too big in the first level. Also I wonder if the main point of level 4 (making challenge being having to build 2 columns next to each other) could be reserved even if scaling down the level to be for example 5 units high. This would make some of the levels less cumbersome. Additionally, varying the shape could make the levels feel more varied just because they look bit different.

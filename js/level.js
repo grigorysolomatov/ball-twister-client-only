@@ -1,4 +1,145 @@
-import { timeout } from './async.js';
+import { timeout } from './tools/async.js';
+
+class MakePattern {
+    constructor(nrows, ncols) {
+	const content = new Array(nrows).fill(null).map(_ => new Array(ncols).fill(0));
+	const patterns = {
+	    '0': [
+		[1, 1, 1],
+		[1, 0, 1],
+		[1, 0, 1],
+		[1, 0, 1],
+		[1, 1, 1],
+	    ],
+	    '1': [
+		[0, 1, 0],
+		[0, 1, 0],
+		[0, 1, 0],
+		[0, 1, 0],
+		[0, 1, 0],
+	    ],
+	    '2': [
+		[1, 1, 1],
+		[0, 0, 1],
+		[1, 1, 1],
+		[1, 0, 0],
+		[1, 1, 1],
+	    ],
+	    '3': [
+		[1, 1, 1],
+		[0, 0, 1],
+		[0, 1, 1],
+		[0, 0, 1],
+		[1, 1, 1],
+	    ],
+	    '4': [
+		[1, 0, 1],
+		[1, 0, 1],
+		[1, 1, 1],
+		[0, 0, 1],
+		[0, 0, 1],
+	    ],
+	    '5': [
+		[1, 1, 1],
+		[1, 0, 0],
+		[1, 1, 1],
+		[0, 0, 1],
+		[1, 1, 1],
+	    ],
+	    '6': [
+		[1, 1, 1],
+		[1, 0, 0],
+		[1, 1, 1],
+		[1, 0, 1],
+		[1, 1, 1],
+	    ],
+	    '7': [
+		[1, 1, 1],
+		[0, 0, 1],
+		[0, 1, 0],
+		[0, 1, 0],
+		[0, 1, 0],
+	    ],
+	    '8': [
+		[1, 1, 1],
+		[1, 0, 1],
+		[1, 1, 1],
+		[1, 0, 1],
+		[1, 1, 1],
+	    ],
+	    '9': [
+		[1, 1, 1],
+		[1, 0, 1],
+		[1, 1, 1],
+		[0, 0, 1],
+		[1, 1, 1],
+	    ],
+	};
+	this.internal = {nrows, ncols, content, patterns};
+	this.external = {};
+    }
+    set(dict) {
+	this.external = {...this.external, ...dict};
+	return this;
+    }
+    drawCustom(row, col, pattern) {
+	const {content} = this.internal;
+	const {drawMode = (oldVal, newVal) => newVal} = this.external;
+	
+	const [prows, pcols] = [pattern.length, pattern[0].length];
+	pattern.flatMap(patternRow => patternRow).forEach((newVal, i) => {
+	    const [prow, pcol] = [Math.floor(i/pcols), i % pcols];
+	    const oldVal = content[row + prow][col + pcol];
+	    content[row + prow][col + pcol] = drawMode(oldVal, newVal);
+	});
+	
+	return this;
+    }
+    draw(row, col, patternKey) {
+	const {patterns} = this.internal;
+	
+	this.drawCustom(row, col, patterns[patternKey]);
+	
+	return this;
+    }
+    orient(coordFunc) {
+	const {content, nrows, ncols} = this.internal;
+	const gridPoints = ({
+	    get: () => {
+		const points = [];
+		for (let row = 0; row < nrows; row++) {
+		    for (let col = 0; col < ncols; col++) {
+			points.push([row, col]);
+		    }
+		}
+		return points;
+	    },
+	}).get();
+	
+	const newGridPoints = gridPoints.map(([row, col]) => coordFunc(row, col));
+	const new_nrows = Math.max(...newGridPoints.map(([row, col]) => row)) + 1;
+	const new_ncols = Math.max(...newGridPoints.map(([row, col]) => col)) + 1;	
+	const newContent = new Array(new_nrows).fill(null).map(_ => new Array(new_ncols).fill(0));
+	gridPoints.forEach(([row, col], i) => {
+	    const [newRow, newCol] = newGridPoints[i];
+	    newContent[newRow][newCol] = content[row][col];
+	});
+
+	this.internal.content = newContent;
+	
+	return this;
+    }
+    get() {
+	const {content} = this.internal;
+	return content;
+    }
+};
+// const content = new MakePattern(5, 3)
+//       .set({drawMode: (x, y) => Number(x+y > 0)})
+//       .draw(0, 0, '7')
+//       .orient((row, col) => [col, row])
+//       .get();
+// console.log(content)
 
 export class LevelClassic {
     constructor(scene) {
@@ -96,6 +237,8 @@ export class LevelClassic {
 	await this.cleanup();
 	return this;
     }
+    
+    // -------------------------------------------------------------------------
     async makeBoard() {
 	const {scene, content, images, sensor: imageSensor} = this.external;
 	const {x, y, step, ncols} = this.internal;
@@ -395,207 +538,5 @@ export class LevelClassic {
 	}
 	targets.forEach(target => target?.destroy());
 	return this;
-    }
-}
-
-class Level_DELETE {
-    set(dict) {
-	this.external = this.external || {};
-	this.external = {...this.external, ...dict};
-	return this;
-    }
-    async appear() {
-	const {x, y, content, images, sensor: imageSensor, scene} = this.external;
-	const [nrows, ncols] = [content.length, content[0].length];
-	const {height, width} = scene.game.config;
-	const step = 0.9*width/ncols;
-	
-	const gridPoints = ({
-	    get: () => {
-		const pts = [];
-		for (let row = 0; row < nrows; row++) {
-		    for (let col = 0; col < ncols; col++) {
-			pts.push([row, col]);
-		    }
-		}
-		return pts;
-	    },
-	}).get();
-	const screenPoints = gridPoints.map(([row, col]) => {
-	    return {
-		x: x + step*(col - 0.5*(ncols-1)),
-		y: y + step*(row - 0.5*(nrows-1)),
-	    };
-	});
-
-	const corrects = gridPoints.map(([row, col]) => {
-	    const idx = col + ncols*row;
-	    const image = images[content[row][col]];
-	    const correct = scene.newSprite(
-		screenPoints[idx].x,
-		screenPoints[idx].y,
-		image,
-	    ).setAlpha(0).setDisplaySize(0.8*step, 0.8*step);
-	    return correct;
-	});
-	
-	const balls = gridPoints.map(([row, col]) => {
-	    const idx = col + ncols*row;
-	    const image = images[content[row][col]];
-	    const ball = scene.newSprite(
-		screenPoints[idx].x,
-		screenPoints[idx].y,
-		image,
-	    ).setAlpha(0).setDisplaySize(0.7*step, 0.7*step);
-	    ball.ballContent = content[row][col];
-	    ball.baseScale = ball.scale;
-	    return ball;
-	});
-	await Promise.all(balls.map(async ball => {
-	    await timeout(Math.random()*1000);
-	    await ball.tween({
-		scale: {from: 0, to: ball.scale},
-		x: {from: x, to: ball.x},
-		y: {from: y, to: ball.y},
-		alpha: 1,
-		duration: 1000,
-		ease: 'Cubic.easeOut',
-	    });
-	}));	
-	
-	const sensors = gridPoints.map(([row, col]) => {
-	    const idx = col + row*ncols;
-	    const sensor = scene.newSprite(
-		screenPoints[idx].x,
-		screenPoints[idx].y,
-		imageSensor,
-	    ).setAlpha(1e-99).setDisplaySize(0.6*step, 0.6*step).setInteractive();	    
-	    return sensor;	    
-	});	
-
-	this.internal = {balls, sensors, gridPoints, screenPoints, nrows, ncols, corrects};
-	return this;
-    }
-    showCorrects(t) {
-	const {balls, corrects} = this.internal;
-	corrects.forEach(correct => {
-	    correct.tween({
-		alpha: t,
-		duration: 500,
-		ease: 'Cubic.easeOut',
-	    });
-	});
-	balls.forEach(ball => {
-	    ball.tween({
-		scale: (1-t)*ball.baseScale + t*0.5*ball.baseScale,
-		duration: 500,
-		ease: 'Cubic.easeOut',
-	    });
-	});
-    }
-    async twist(row, col, angle) {
-	const {balls, screenPoints, nrows, ncols} = this.internal;
-	
-	if (({
-	    isOnEdge: () => {
-		const horizontal = Math.abs(col - Math.floor(ncols/2)) === Math.floor(ncols/2);
-		const vertical = Math.abs(row - Math.floor(nrows/2)) === Math.floor(nrows/2);
-		return horizontal || vertical;
-	    },
-	}).isOnEdge()) { return; }
-
-	const cyclePoints = ({
-	    getOffsets: () => {
-		return [
-		    [-1, -1],
-		    [-1, 0],
-		    [-1, 1],
-		    [0, 1],
-		    [1, 1],
-		    [1, 0],
-		    [1, -1],
-		    [0, -1],
-		];
-	    },
-	}).getOffsets().map(([r, c]) => [row + r, col + c]);
-	const tempBalls = [...balls];
-	
-	const startIdxs = cyclePoints.map(([row, col]) => col + row*ncols);
-	const endIdxs = cyclePoints.map((_, i) =>
-	    startIdxs[(i + angle + startIdxs.length) % startIdxs.length]);
-	
-	startIdxs.map((_, i) => {
-	    balls[endIdxs[i]] = tempBalls[startIdxs[i]];
-	    tempBalls[startIdxs[i]].tween({
-		x: screenPoints[endIdxs[i]].x,
-		y: screenPoints[endIdxs[i]].y,
-		duration: 600,
-		ease: 'Quint.easeOut',
-	    });
-	});
-    }
-    isSolved() {
-	const {content} = this.external;
-	const {balls} = this.internal;
-	
-	const flatContent = content.flatMap(row => row);
-
-	const match = flatContent
-	      .map((_, i) => i)
-	      .reduce((acc, i) => acc && (flatContent[i] === balls[i].ballContent), true);
-
-	return match;
-    }
-    async shuffle(num=50, delay=0) {
-	const {nrows, ncols} = this.internal;
-	const shuffleSeq = ({
-	    getSingle: () => {
-		const row = Math.floor(Math.random()*(nrows-2) + 1);
-		const col = Math.floor(Math.random()*(ncols-2) + 1);
-		const angle = Math.sign(Math.random()-0.5)*2;
-		return [row, col, angle];
-	    },
-	    get: function(num) {
-		return new Array(num).fill(null).map(_ => this.getSingle());
-	    },
-	}).get(num);
-	for (const [row, col, angle] of shuffleSeq) {
-	    if (delay > 0) { await timeout(delay); }
-	    this.twist(row, col, angle);
-	}
-    }
-    async remove() {
-	const {x, y} = this.external;
-	const {balls, sensors} = this.internal;
-	
-	sensors.forEach(sensor => sensor.destroy());	
-	await Promise.all(balls.map(async ball => {
-	    await timeout(Math.random()*500);
-	    await ball.tween({
-		x, y,
-		scale: 0,
-		alpha: 0,
-		duration: 1000,
-		ease: 'Cubic.easeInOut',
-	    });
-	}));
-	balls.forEach(ball => ball.destroy());
-    }
-    async solve() {
-	const {sensors, gridPoints, nrows, ncols} = this.internal;
-	let solved = false;
-	const p_wins = sensors.map((sensor, i) => new Promise(resolve => {
-	    const [row, col] = [Math.floor(i/ncols), i % ncols];
-	    sensor.on('pointerdown', async () => {
-		if (solved) { return; }
-		const angle = await Promise.race([
-		    new Promise(resolve => setTimeout(() => resolve(-2), 200)),
-		    new Promise(resolve => sensor.on('pointerup', () => resolve(2))),
-		]);
-		this.twist(row, col, angle);
-		if (this.isSolved()) { solved = true; resolve(); }
-	    });
-	}));
-	await Promise.race(p_wins);
     }
 }

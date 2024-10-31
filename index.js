@@ -1,6 +1,6 @@
 import { createGame } from './js/wrap-phaser.js';
-import { StateTree } from './js/state-tree.js';
-import { gameContent } from './js/game-content.js';
+import { StateTree } from './js/tools/state-tree.js';
+import { gameContent } from './js/game-content/game-content.js';
 
 async function main() {
     await new Promise(resolve => WebFont.load({

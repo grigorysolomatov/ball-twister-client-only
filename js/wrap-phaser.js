@@ -1,4 +1,4 @@
-import { timeout } from './async.js';
+import { timeout } from './tools/async.js';
 // import { Level } from './level.js';
 
 const tuneEntity = entity => {
