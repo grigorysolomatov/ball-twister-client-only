@@ -1,5 +1,4 @@
 import { timeout } from './tools/async.js';
-// import { Level } from './level.js';
 
 const tuneEntity = entity => {
     entity.tween = async settings => {
@@ -71,10 +70,11 @@ const tuneScene = scene => {
 const tuneGame = game => {
     game.newScene = async key => {
 	const scene = await new Promise(resolve => {
-	    const scene = new Phaser.Scene({key}); scene.create = () => resolve(scene);
+	    const scene = new Phaser.Scene({key});
+	    scene.create = () => resolve(scene);
 	    game.scene.add(key, scene);
 	    game.scene.start(key);
-	});	    
+	});
 	return tuneScene(scene);
     };
     return game;

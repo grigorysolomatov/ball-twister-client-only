@@ -1,5 +1,5 @@
 import { createGame } from './js/wrap-phaser.js';
-import { StateTree } from './js/tools/state-tree.js';
+import { StateTree } from './js/tools/state.js';
 import { gameContent } from './js/game-content/game-content.js';
 
 async function main() {

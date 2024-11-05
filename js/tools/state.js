@@ -16,3 +16,22 @@ export class StateTree {
 	return this;
     }
 }
+export class StateMachine {
+    constructor() {
+	this.external = {};
+    }
+    set(dict) {
+	this.external = this.external || {};
+	this.external = {...this.external, ...dict};
+	return this;
+    }
+    async run() {
+	const {states, start: startState, context={}} = this.external;
+	
+	let currentState = startState;
+	while (true) {
+	    if (!states[currentState]) { break; }
+	    currentState = await states[currentState](context);
+	}
+    }
+}

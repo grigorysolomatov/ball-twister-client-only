@@ -1,14 +1,17 @@
-import { levels } from './levels.js';
+import { puzzles } from './puzzles.js';
 import { learn } from './learn.js';
+import { shariki } from './shariki.js';
 
 export const gameContent = {
     0: async ctx => {
 	const {scene} = ctx;
 	
 	await scene.loadAssets({
-	    red: 'assets/red.svg',
 	    gray: 'assets/gray.svg',
-	    gold: 'assets/gold.svg',
+	    yellow: 'assets/yellow.svg',
+	    red: 'assets/red.svg',
+	    blue: 'assets/blue.svg',
+	    green: 'assets/green.svg',
 	    sensor: 'assets/sensor.svg',
 	    trofe: 'assets/trofe.png',
 	    eye: 'assets/eye.svg',
@@ -32,12 +35,14 @@ export const gameContent = {
 	    const {scene, height, width, title} = ctx;
 	    
 	    const choice = await scene.newMenu(0.5*width, 0.5*height, {
-		levels: 'Levels',
+		puzzles: 'Puzzles',
+		shariki: 'Shariki',
 		learn: 'Learn',
 	    });
 	    return choice;
 	},
-	levels,
+	puzzles,
 	learn,
+	shariki,
     },
 };
