@@ -629,7 +629,7 @@ export class LevelShariki {
 		    await timeout(600);
 		    base.growAllSeeds();
 		    try {
-			new Array(6).fill(null).map(_ => base.seedRandomBall());
+			new Array(7).fill(null).map(_ => base.seedRandomBall());
 		    } catch {
 			return 's_cleanup';
 		    }
