@@ -134,6 +134,34 @@ class LevelBase {
 	});	
 	return true;
     }
+    updateInfoText(text, inheritX=true) { // Experimental
+	const {infoText, width, balls} = this.internal;
+	const {scene} = this.external;
+
+	const menuStep = 50;	
+	let [x, y] = [0.5*width, balls[0].y - 1.5*menuStep];
+	const newInfoText = scene.newText(x, y, text).setOrigin(0.5);
+	
+	if (infoText) {
+	    y = infoText.y;
+	    if (inheritX) { x = 0.5*(newInfoText.width - infoText.width) + infoText.x; }	    
+	    newInfoText.setX(x).setY(y);
+	    infoText.tween({
+		alpha: 0,
+		duration: 200,
+		ease: 'Linear',
+		onComplete: () => infoText.destroy(),
+	    });	    
+	}	
+	newInfoText.tween({
+	    alpha: {from: 0, to: 1},
+	    duration: 200,
+	    ease: 'Linear',
+	});
+	
+	this.internal.infoText = newInfoText;
+	return this;
+    }
     // -------------------------------------------------------------------------
     replaceBall(row, col, k) {
 	const {scene, images} = this.external;
@@ -631,7 +659,8 @@ export class LevelShariki {
 		    base.growAllSeeds();
 		    try {
 			new Array(Math.floor(spawnAmount)).fill(null).map(_ => base.seedRandomBall());
-			spawnAmount += 0.5;
+			base.updateInfoText(`Level ${Math.floor(spawnAmount)-2}`);
+			spawnAmount += 0.25;
 		    } catch {
 			return 's_cleanup';
 		    }
