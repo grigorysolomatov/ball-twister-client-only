@@ -602,7 +602,7 @@ export class LevelShariki {
 	const settings = this.external;	
 	const base = new LevelBase().set(settings);
 	let spawnTimer = 0;
-	let mount = 3
+	let spawnAmount = 3;
 	const states = {
 	    's_init': async () => {
 		base.precompute();
@@ -630,8 +630,8 @@ export class LevelShariki {
 		    await timeout(600);
 		    base.growAllSeeds();
 		    try {
-			new Array(mount).fill(null).map(_ => base.seedRandomBall());
-			spawnAmount += 1;
+			new Array(Math.floor(spawnAmount)).fill(null).map(_ => base.seedRandomBall());
+			spawnAmount += 0.5;
 		    } catch {
 			return 's_cleanup';
 		    }
