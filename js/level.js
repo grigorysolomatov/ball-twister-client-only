@@ -631,6 +631,7 @@ export class LevelShariki {
 	const base = new LevelBase().set(settings);
 	let spawnTimer = 0;
 	let spawnAmount = 3;
+	let score = 0;
 	const states = {
 	    's_init': async () => {
 		base.precompute();
@@ -659,7 +660,6 @@ export class LevelShariki {
 		    base.growAllSeeds();
 		    try {
 			new Array(Math.floor(spawnAmount)).fill(null).map(_ => base.seedRandomBall());
-			base.updateInfoText(`Level ${Math.floor(spawnAmount)-2}`);
 			spawnAmount += 0.25;
 		    } catch {
 			return 's_cleanup';
@@ -667,6 +667,8 @@ export class LevelShariki {
 		} spawnTimer -= 1;
 		const killables = base.getKillableBalls();
 		if (killables.length > 0) {
+		    score += killables.length;
+		    base.updateInfoText(`Score: ${score}`);
 		    await timeout(600);
 		    killables.forEach(([row, col]) => base.replaceBall(row, col, 0));
 		}
