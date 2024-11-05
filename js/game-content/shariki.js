@@ -26,7 +26,7 @@ export const shariki = {
 		[0,0,0,0,0,0,0],
 		[0,0,0,0,0,0,0],
 	    ],
-	    images: ['gray', 'yellow', 'red', 'green', 'blue'],
+	    images: ['gray', 'yellow', 'red', 'green', 'blue', 'pink'],
 	    sensor: 'sensor',
 	    eye: 'eye',
 	    trofe: 'trofe',
