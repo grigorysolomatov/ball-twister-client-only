@@ -4,7 +4,7 @@
    version="1.2"
    width="48.86636"
    id="svg49"
-   sodipodi:docname="purple.svg"
+   sodipodi:docname="pink.svg"
    inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
    viewBox="-1 -1 48.86636 47.134045"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -23,9 +23,9 @@
      inkscape:zoom="2.6359065"
      inkscape:cx="25.797577"
      inkscape:cy="70.184584"
-     inkscape:window-width="1920"
-     inkscape:window-height="1080"
-     inkscape:window-x="0"
+     inkscape:window-width="956"
+     inkscape:window-height="1036"
+     inkscape:window-x="960"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg49" />
@@ -33,21 +33,21 @@
      id="defs1" />
   <g
      id="g3"
-     style="stroke:#aa00aa;stroke-opacity:1;fill:#cc44cc;fill-opacity:1">
+     style="stroke:#8800aa;stroke-opacity:1;fill:#aa44ff;fill-opacity:1">
     <g
        id="g4"
-       style="fill:#cc44cc;fill-opacity:1;stroke:#aa00aa;stroke-width:9.09248;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#aa44ff;fill-opacity:1;stroke:#8800aa;stroke-width:9.09248;stroke-dasharray:none;stroke-opacity:1"
        transform="matrix(0.44793517,0,0,0.43205584,-0.08341656,-0.1159095)">
       <g
          id="g2"
-         style="fill:#cc44cc;fill-opacity:1;stroke:#aa00aa;stroke-width:9.09248;stroke-dasharray:none;stroke-opacity:1"
+         style="fill:#aa44ff;fill-opacity:1;stroke:#8800aa;stroke-width:9.09248;stroke-dasharray:none;stroke-opacity:1"
          transform="translate(0.5,0.5)">
         <g
            id="g1"
-           style="fill:#cc44cc;fill-opacity:1;stroke:#aa00aa;stroke-width:9.09248;stroke-dasharray:none;stroke-opacity:1"
+           style="fill:#aa44ff;fill-opacity:1;stroke:#8800aa;stroke-width:9.09248;stroke-dasharray:none;stroke-opacity:1"
            transform="translate(0.5,0.5)">
           <circle
-             style="fill:#cc44cc;fill-opacity:1;stroke:#aa00aa;stroke-width:9.09248;stroke-dasharray:none;stroke-opacity:1"
+             style="fill:#aa44ff;fill-opacity:1;stroke:#8800aa;stroke-width:9.09248;stroke-dasharray:none;stroke-opacity:1"
              id="path1"
              cx="51.5"
              cy="51.5"
