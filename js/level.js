@@ -241,46 +241,7 @@ class LevelBase {
 	scene.events.on('update', follow);
 	
 	return this;
-    }
-    seedRandomBall() {
-	const {images} = this.external;
-	const {balls, nrows, ncols, pointsRowCol} = this.internal;
-
-	const canSeed = ball => (ball.ballContent === 0) && !ball.seed;
-	const emptySpots = pointsRowCol.filter(([row, col]) => canSeed(balls[row*ncols + col]));
-	const [row, col] = emptySpots[Math.floor(Math.random()*emptySpots.length)];
-	const value = Math.floor(Math.random()*(images.length-1)) + 1;
-
-	this.seedBall(row, col, value);
-	
-	return this;
-    }
-    seedRandomBallSmart() {
-	const {images} = this.external;
-	const {balls, nrows, ncols, pointsRowCol} = this.internal;
-
-	const canSeed = ball => (ball.ballContent === 0) && !ball.seed;
-	const emptySpots = pointsRowCol.filter(([row, col]) => canSeed(balls[row*ncols + col]));
-	const [row, col] = emptySpots[Math.floor(Math.random()*emptySpots.length)];
-	
-	const counts = pointsRowCol
-	      .filter(([r, c]) => (r+c)%2 === (row+col)%2) // Same parity as [row, col]
-	      .map(([r, c]) => balls[r*ncols + c].ballContent)
-	      .filter(content => 0 < content) // Discard 0 (gray)
-	      .reduce((acc, curr) => {
-		  const key = curr.toString();
-		  acc[key] = acc[key] || 0;
-		  acc[key] += 1;
-		  return acc;
-	      }, {});
-	const defaultValue = Math.floor(Math.random()*(images.length-1)) + 1;
-	const value = Object.keys(counts)
-	      .filter(key => counts[key] < 2) // Ignore >= 2
-	      .reduce((a, b) => counts[a] > counts[b] ? a : b, defaultValue); // Target maximal	
-	this.seedBall(row, col, value);
-	
-	return this;
-    }
+    }    
     growAllSeeds() {
 	const {balls} = this.internal;
 	balls.map((_, i) => i).forEach(i => {
@@ -316,6 +277,49 @@ class LevelBase {
 	//    this.replaceBall(row, col, 0);
 	//});
 	//return this;
+    }
+    seedRandomBall() {
+	const {images} = this.external;
+	const {balls, nrows, ncols, pointsRowCol} = this.internal;
+
+	const canSeed = ball => (ball.ballContent === 0) && !ball.seed;
+	const emptySpots = pointsRowCol.filter(([row, col]) => canSeed(balls[row*ncols + col]));
+	const [row, col] = emptySpots[Math.floor(Math.random()*emptySpots.length)];
+	const value = Math.floor(Math.random()*(images.length-1)) + 1;
+
+	this.seedBall(row, col, value);
+	
+	return this;
+    }
+    seedRandomBallSmart() {
+	const {images} = this.external;
+	const {balls, nrows, ncols, pointsRowCol} = this.internal;
+
+	const canSeed = ball => (ball.ballContent === 0) && !ball.seed;
+	const emptySpots = pointsRowCol.filter(([row, col]) => canSeed(balls[row*ncols + col]));
+	const [row, col] = emptySpots[Math.floor(Math.random()*emptySpots.length)];
+
+	const getCount = same => pointsRowCol
+	      .filter(([r, c]) => ((r+c)%2 === (row+col)%2) === same)
+	      .map(([r, c]) => balls[r*ncols + c].ballContent)
+	      .filter(content => 0 < content) // Discard 0 (gray)
+	      .reduce((acc, curr) => {
+		  const key = curr.toString();
+		  acc[key] = acc[key] || 0;
+		  acc[key] += 1;
+		  return acc;
+	      }, {});
+	
+	const countSame = getCount(true);
+	const countOther = getCount(false);	
+	const defaultValue = Math.floor(Math.random()*(images.length-1)) + 1;
+	
+	const value = Object.keys(counts)
+	      .filter(key => countSame[key] <= countOther[key])
+	      .reduce((a, b) => countSame[a] > counts [b] ? a : b, defaultValue); // Target maximal	
+	this.seedBall(row, col, value);
+	
+	return this;
     }
     // -------------------------------------------------------------------------    
     async makeBoard() {
@@ -687,11 +691,14 @@ export class LevelShariki {
 		    spawnTimer = 3;
 		    await timeout(600);
 		    base.growAllSeeds();
-		    { // try
+		    try {
 			new Array(Math.floor(spawnAmount)).fill(null).map(_ => base.seedRandomBall());
 			spawnAmount += 0.25;
 		    }
-		    // catch { return 's_cleanup'; }
+		    catch {
+			console.log('CATCH');
+			return 's_cleanup';
+		    }
 		} spawnTimer -= 1;
 		const killables = base.getKillablePoints();
 		if (killables.length > 0) {
