@@ -2,11 +2,14 @@ import { timeout } from './tools/async.js';
 import { StateMachine } from './tools/state.js';
 import { PatternMaker } from './pattern-maker.js';
 
-//const content = new PatternMaker(5, 3)
-//      .draw(0, 0, [[1], [2], [3]])
-//      .symmetrize((row, col) => [row, 2-col])
-//      .get();
-//console.log(content)
+
+{ // Scribbles
+    //const content = new PatternMaker(5, 3)
+    //      .draw(0, 0, [[1], [2], [3]])
+    //      .symmetrize((row, col) => [row, 2-col])
+    //      .get();
+    //console.log(content)
+}
 
 class LevelBase {
     constructor() {
@@ -252,6 +255,32 @@ class LevelBase {
 	
 	return this;
     }
+    seedRandomBallSmart() {
+	const {images} = this.external;
+	const {balls, nrows, ncols, pointsRowCol} = this.internal;
+
+	const canSeed = ball => (ball.ballContent === 0) && !ball.seed;
+	const emptySpots = pointsRowCol.filter(([row, col]) => canSeed(balls[row*ncols + col]));
+	const [row, col] = emptySpots[Math.floor(Math.random()*emptySpots.length)];
+	
+	const counts = pointsRowCol
+	      .filter(([r, c]) => (r+c)%2 === (row+col)%2) // Same parity as [row, col]
+	      .map(([r, c]) => balls[r*ncols + c].ballContent)
+	      .filter(content => 0 < content) // Discard 0 (gray)
+	      .reduce((acc, curr) => {
+		  const key = curr.toString();
+		  acc[key] = acc[key] || 0;
+		  acc[key] += 1;
+		  return acc;
+	      }, {});
+	const defaultValue = Math.floor(Math.random()*(images.length-1)) + 1;
+	const value = Object.keys(counts)
+	      .filter(key => counts[key] < 2) // Ignore >= 2
+	      .reduce((a, b) => counts[a] > counts[b] ? a : b, defaultValue); // Target maximal	
+	this.seedBall(row, col, value);
+	
+	return this;
+    }
     growAllSeeds() {
 	const {balls} = this.internal;
 	balls.map((_, i) => i).forEach(i => {
@@ -262,11 +291,11 @@ class LevelBase {
 	    seed.grow();
 	});
     }
-    getKillableBalls() {
+    getKillablePoints() {
 	const {balls, nrows, ncols, pointsRowCol} = this.internal;	
 	const toKill = [];
-	const getBall = (r, c) => balls[r*ncols + c];
-	pointsRowCol.forEach(([row, col]) => {   	    
+	const getBall = (r, c) => (r < nrows && c < ncols)? balls[r*ncols + c] : null;
+	pointsRowCol.forEach(([row, col]) => {
 	    const targetBall = getBall(row, col);
 	    if (targetBall.ballContent === 0) { return; }
 	    
@@ -658,14 +687,13 @@ export class LevelShariki {
 		    spawnTimer = 3;
 		    await timeout(600);
 		    base.growAllSeeds();
-		    try {
+		    { // try
 			new Array(Math.floor(spawnAmount)).fill(null).map(_ => base.seedRandomBall());
 			spawnAmount += 0.25;
-		    } catch {
-			return 's_cleanup';
 		    }
+		    // catch { return 's_cleanup'; }
 		} spawnTimer -= 1;
-		const killables = base.getKillableBalls();
+		const killables = base.getKillablePoints();
 		if (killables.length > 0) {
 		    score += killables.length;
 		    base.updateInfoText(`Score: ${score}`);
