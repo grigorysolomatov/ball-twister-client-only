@@ -300,6 +300,7 @@ class LevelBase {
 	const [row, col] = emptySpots[Math.floor(Math.random()*emptySpots.length)];
 
 	const getCount = same => pointsRowCol
+	      .sort(() => Math.random() - 0.5)
 	      .filter(([r, c]) => ((r+c)%2 === (row+col)%2) === same)
 	      .map(([r, c]) => balls[r*ncols + c].ballContent)
 	      .filter(content => 0 < content) // Discard 0 (gray)
