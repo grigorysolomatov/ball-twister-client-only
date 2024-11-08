@@ -27,7 +27,7 @@ class LevelBase {
 	const [nrows, ncols] = [content.length, content[0].length];
 	const {height, width} = scene.game.config;
 	const [x, y] = [0.5*width, 0.5*height];
-	const step = 0.9*width/ncols;
+	const step = Math.min(0.9*width/ncols, 0.45*height/nrows);
 
 	const pointsRowCol = ({
 	    get: () => {
@@ -726,6 +726,7 @@ export class LevelShariki {
 	    },
 	    's_start': async () => {
 		const result = await base.playerStart();
+		base.activateSensors(true);
 		return {'start': 's_eyeOpen', 'back': 's_cleanup', }[result];
 	    },
 	    's_shuffle': async () => {
@@ -733,8 +734,7 @@ export class LevelShariki {
 		return {'shuffled': 's_eyeOpen', 'back': 's_cleanup'}[result];
 	    },
 	    's_eyeOpen': async () => {
-		await timeout(500);
-		base.activateSensors(true);		
+		await timeout(500);		
 		await base.eyeOpen();
 		
 		return 's_spawn';
