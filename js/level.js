@@ -303,6 +303,21 @@ class LevelBase {
 	
 	return this;
     }
+    seedRandomBalls(num) {
+	const {images} = this.external;
+	const {balls, nrows, ncols, pointsRowCol} = this.internal;
+
+	const targetPoints = pointsRowCol
+	      .filter(([row, col]) => balls[row*ncols + col].ballContent === 0)
+	      .filter(([row, col]) => !balls[row*ncols + col].seed)
+	      .sort(() => Math.random() - 0.5)
+	      .slice(0, num);
+
+	const randomValue = () => Math.floor(Math.random()*(images.length-1)) + 1;
+	targetPoints.forEach(([row, col]) => this.seedBall(row, col, randomValue()));
+	
+	return this;
+    }
     seedRandomBallSmart() {
 	return this.seedRandomBall();
 	// ---------------------------------------------------------------------
@@ -384,7 +399,7 @@ class LevelBase {
 		      value,
 		      size: 25,
 		      x: x + step*(i-1.5),
-		      y: y - 1.5*step,
+		      y: y - 1.2*step,
 		  });		  
 		  return {[key]: counter};
 	      })
@@ -741,14 +756,8 @@ export class LevelShariki {
 	    },
 	    's_spawn': async () => {
 		await timeout(600);
-		base.growAllSeeds();
-		try {
-		    new Array(Math.floor(7)).fill(null).map(_ => base.seedRandomBallSmart());
-		}
-		catch {
-		    console.log('FULL');		    
-		    // return 's_cleanup';
-		}
+		base.growAllSeeds(); // await?
+		base.seedRandomBalls(7);
 		return 's_kill';
 	    },
 	    's_twist': async () => {
