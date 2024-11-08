@@ -310,7 +310,9 @@ class LevelBase {
 	const targetPoints = pointsRowCol
 	      .filter(([row, col]) => balls[row*ncols + col].ballContent === 0)
 	      .filter(([row, col]) => !balls[row*ncols + col].seed)
-	      .sort(() => Math.random() - 0.5).sort(() => Math.random() - 0.5)	      
+	      .sort(() => Math.random() - 0.5)
+	      .sort(() => Math.random() - 0.5)
+	      .sort(() => Math.random() - 0.5)
 	      .slice(0, num);
 
 	const getCounts = parity => pointsRowCol
@@ -419,7 +421,7 @@ class LevelBase {
 
 	const {x, y} = balls[Math.floor(0.5*ncols)];
 
-	const counters = Object.entries({heart: 3, dollar: 0, clock: 0, scul: 0})
+	const counters = Object.entries({heart: 10, dollar: 0, clock: 0, scul: 0})
 	      .map(([key, value], i) => {
 		  const counter = new Counter().set({
 		      scene,
@@ -800,7 +802,11 @@ export class LevelShariki {
 		if (killables.length > 0) {
 		    await timeout(600);
 		    killables.forEach(([row, col]) => base.replaceBall(row, col, 0));
-		    base.addToCounters({heart: killables.length, dollar: killables.length});
+		    const payoff = x => Math.ceil(3*(x/3)**2);
+		    base.addToCounters({
+			heart: payoff(killables.length),
+			dollar: payoff(killables.length),
+		    });
 		}		
 		
 		return 's_takeDamage';
@@ -811,7 +817,8 @@ export class LevelShariki {
 		    base.addToCounters({
 			heart: -base.getValue('scul'),
 			clock: 3 - base.getValue('clock'),
-			scul: (sculCounter%2) === 0, // scul: 1,
+			scul: 1,
+			// scul: (sculCounter%2) === 0,
 		    }); sculCounter += 1;
 		}		
 		return 's_checkDeath';
