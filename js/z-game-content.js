@@ -1,27 +1,20 @@
-import { puzzles } from './puzzles.js';
-import { learn } from './learn.js';
-import { shariki } from './shariki.js';
+//import { timeout } from './tools/async.js';
+//import { LevelClassic } from './level.js';
+import { chapters } from './game-content/chapters.js';
+import { learn } from './game-content/learn.js';
 
 export const gameContent = {
     0: async ctx => {
 	const {scene} = ctx;
 	
 	await scene.loadAssets({
-	    gray: 'assets/balls/gray.svg',
-	    yellow: 'assets/balls/yellow.svg',
-	    red: 'assets/balls/red.svg',
-	    green: 'assets/balls/green.svg',
-	    blue: 'assets/balls/blue.svg',
-	    pink: 'assets/balls/pink.svg',
-	    
-	    sensor: 'assets/misc/sensor.svg',
-	    trofe: 'assets/misc/trofe.png',
-	    eye: 'assets/misc/eye.svg',
-
-	    heart: 'assets/counters/heart.svg',
-	    dollar: 'assets/counters/dollar.svg',
-	    scul: 'assets/counters/scul.svg',
-	    clock: 'assets/counters/clock.svg',
+	    red: 'assets/red.svg',
+	    gray: 'assets/gray.svg',
+	    gold: 'assets/gold.svg',
+	    sensor: 'assets/sensor.svg',
+	    trofe: 'assets/trofe.png',
+	    eye: 'assets/eye.svg',
+	    brain: 'assets/brain.png',
 	});
 	
 	const {height, width} = scene.game.config;
@@ -41,14 +34,12 @@ export const gameContent = {
 	    const {scene, height, width, title} = ctx;
 	    
 	    const choice = await scene.newMenu(0.5*width, 0.5*height, {
-		puzzles: 'Puzzles',
-		shariki: 'Shariki',
+		chapters: 'Chapters',
 		learn: 'Learn',
 	    });
 	    return choice;
 	},
-	puzzles,
+	chapters,
 	learn,
-	shariki,
     },
 };

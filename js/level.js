@@ -1,7 +1,7 @@
 import { timeout } from './tools/async.js';
 import { StateMachine } from './tools/state.js';
 import { PatternMaker } from './pattern-maker.js';
-
+import { Counter } from './counter.js';
 
 { // Scribbles
     //const content = new PatternMaker(5, 3)
@@ -193,6 +193,22 @@ class LevelBase {
 	
 	return this;
     }
+    addToCounters(dict) {
+	Object.keys(dict)
+	    .filter(key => dict[key])
+	    .forEach(key => this.internal[key].add(dict[key]));
+	return this;
+    }
+    killBall(row, col) {
+	const {heart, dollar} = this.internal;
+	this.replaceBall(row, col, 0);
+	heart.add(1);
+	dollar.add(1);
+	return this;
+    }
+    getValue(key) {
+	return this.internal[key].getValue();
+    }
     spawnRandomBall() { // DELETE?
 	const {images} = this.external;
 	const {balls, nrows, ncols, pointsRowCol} = this.internal;
@@ -353,6 +369,33 @@ class LevelBase {
 
 	this.internal = {...this.internal, hints, balls, sensors};
 	
+	return this;
+    }
+    async makeCounters() {
+	const {scene} = this.external;
+	const {balls, height, width, nrows, ncols, step} = this.internal;
+
+	const {x, y} = balls[Math.floor(0.5*ncols)];
+
+	const counters = Object.entries({'heart': 3, 'dollar': 0, 'clock': 3, 'scul': 1})
+	      .map(([key, value], i) => {
+		  const counter = new Counter().set({
+		      scene,
+		      image: key,
+		      value,
+		      size: 25,
+		      x: x + step*(i-1.5),
+		      y: y - 1.5*step,
+		  });		  
+		  return {[key]: counter};
+	      })
+	      .reduce((a, b) => ({...a, ...b}), {});
+	Object.keys(counters).forEach(async (key, i) => {
+	    await timeout(50*i);
+	    await counters[key].create();	    
+	});
+	
+	Object.assign(this.internal, counters);
 	return this;
     }
     async removeBoard() {
@@ -562,6 +605,9 @@ class LevelBase {
 	    ...this.internal.balls,
 	    ...this.internal.balls.filter(ball => ball.seed).map(ball => ball.seed),
 	    ...this.internal.sensors,
+	    ...['heart', 'dollar', 'clock', 'scul']
+		.map(key => this.internal[key].getEntities())
+		.flatMap(x => x),
 	    ...['rewardImage', 'rewardText', 'submitText',
 		'startButton', 'backButton', 'eyeButton',
 		'infoText']
@@ -661,16 +707,22 @@ export class LevelShariki {
 	return this;
     }
     async run() {
-	const settings = this.external;	
+	const settings = this.external;
+	const {scene} = this.external;
+	const {height, width} = scene.game.config;
+	
 	const base = new LevelBase().set(settings);
-	let spawnTimer = 0;
 	let spawnAmount = 3;
 	let score = 0;
+	let sculCounter = 0;
 	const states = {
 	    's_init': async () => {
 		base.precompute();
+		
 		await base.makeBoard();
 		await base.makeButtons();
+		await base.makeCounters();
+				
 		return 's_start';
 	    },
 	    's_start': async () => {
@@ -683,36 +735,48 @@ export class LevelShariki {
 	    },
 	    's_eyeOpen': async () => {
 		await timeout(500);
-		base.activateSensors(true);
+		base.activateSensors(true);		
 		await base.eyeOpen();
+		
 		return 's_spawn';
 	    },
-	    's_spawn': async () => {		
-		if (spawnTimer === 0) {
-		    spawnTimer = 3;
-		    await timeout(600);
-		    base.growAllSeeds();
-		    try {
-			new Array(Math.floor(spawnAmount)).fill(null).map(_ => base.seedRandomBall());
-			spawnAmount += 0.25;
-		    }
-		    catch {
-			console.log('CATCH');
-			return 's_cleanup';
-		    }
-		} spawnTimer -= 1;
-		const killables = base.getKillablePoints();
-		if (killables.length > 0) {
-		    score += killables.length;
-		    base.updateInfoText(`Score: ${score}`);
-		    await timeout(600);
-		    killables.forEach(([row, col]) => base.replaceBall(row, col, 0));
+	    's_spawn': async () => {
+		await timeout(600);
+		base.growAllSeeds();
+		try {
+		    new Array(Math.floor(7)).fill(null).map(_ => base.seedRandomBall());
 		}
-		return 's_twist';
+		catch {
+		    console.log('FULL');
+		    // return 'bs_cleanup';
+		}
+		return 's_kill';
 	    },
 	    's_twist': async () => {
-		const result = await base.playerTurn();		
-		return {'twist': 's_spawn', 'back': 's_cleanup'}[result];
+		if (base.getValue('heart') <= 0) { return 's_cleanup'; }
+		const result = await base.playerTurn();
+		if (result === 'twist') {		    		    
+		    if (base.getValue('clock') === 1) {
+			sculCounter += 1;
+			base.addToCounters({
+			    heart: -base.getValue('scul'),
+			    clock: 2,
+			    scul: (sculCounter%2) === 0,
+			});
+			return 's_spawn';
+		    }
+		    base.addToCounters({clock: -1});		    
+		}
+		return {'twist': 's_kill', 'back': 's_cleanup'}[result];
+	    },
+	    's_kill': async () => {
+		const killables = base.getKillablePoints();
+		if (killables.length > 0) {
+		    await timeout(600);
+		    killables.forEach(([row, col]) => base.replaceBall(row, col, 0));
+		    base.addToCounters({heart: killables.length, dollar: killables.length});
+		}
+		return 's_twist';
 	    },
 	    's_eyeClose': async () => {
 		await timeout(500);
