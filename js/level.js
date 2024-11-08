@@ -289,10 +289,6 @@ class LevelBase {
 	const uniqueToKill = [...new Set(toKill.map(([row, col]) => `${row} ${col}`))]
 	      .map(s => s.split(' ').map(x => Number(x)));
 	return uniqueToKill;
-	//uniqueToKill.forEach(([row, col]) => {
-	//    this.replaceBall(row, col, 0);
-	//});
-	//return this;
     }
     seedRandomBall() {
 	const {images} = this.external;
@@ -308,6 +304,8 @@ class LevelBase {
 	return this;
     }
     seedRandomBallSmart() {
+	return this.seedRandomBall();
+	// ---------------------------------------------------------------------
 	const {images} = this.external;
 	const {balls, nrows, ncols, pointsRowCol} = this.internal;
 
@@ -331,9 +329,10 @@ class LevelBase {
 	const countOther = getCount(false);	
 	const defaultValue = Math.floor(Math.random()*(images.length-1)) + 1;
 	
-	const value = Object.keys(counts)
+	const value = Object.keys(countSame)
 	      .filter(key => countSame[key] <= countOther[key])
-	      .reduce((a, b) => countSame[a] > counts [b] ? a : b, defaultValue); // Target maximal	
+	      .reduce((a, b) => countSame[a] > countSame[b] ? a : b, defaultValue); // Target maximal
+	console.log(value);
 	this.seedBall(row, col, value);
 	
 	return this;
@@ -377,7 +376,7 @@ class LevelBase {
 
 	const {x, y} = balls[Math.floor(0.5*ncols)];
 
-	const counters = Object.entries({'heart': 3, 'dollar': 0, 'clock': 3, 'scul': 1})
+	const counters = Object.entries({'heart': 10, 'dollar': 0, 'clock': 3, 'scul': 1})
 	      .map(([key, value], i) => {
 		  const counter = new Counter().set({
 		      scene,
@@ -744,24 +743,27 @@ export class LevelShariki {
 		await timeout(600);
 		base.growAllSeeds();
 		try {
-		    new Array(Math.floor(7)).fill(null).map(_ => base.seedRandomBall());
+		    new Array(Math.floor(7)).fill(null).map(_ => base.seedRandomBallSmart());
 		}
 		catch {
-		    console.log('FULL');
-		    // return 'bs_cleanup';
+		    console.log('FULL');		    
+		    // return 's_cleanup';
 		}
 		return 's_kill';
 	    },
 	    's_twist': async () => {
-		if (base.getValue('heart') <= 0) { return 's_cleanup'; }
+		if (base.getValue('heart') <= 0) {
+		    await timeout(1000);
+		    return 's_cleanup';
+		}
 		const result = await base.playerTurn();
 		if (result === 'twist') {		    		    
 		    if (base.getValue('clock') === 1) {
 			sculCounter += 1;
 			base.addToCounters({
-			    heart: -base.getValue('scul'),
+			    heart: -base.getValue('clock'),
 			    clock: 2,
-			    scul: (sculCounter%2) === 0,
+			    scul: (sculCounter%4) === 0,
 			});
 			return 's_spawn';
 		    }
