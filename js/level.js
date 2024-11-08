@@ -310,11 +310,39 @@ class LevelBase {
 	const targetPoints = pointsRowCol
 	      .filter(([row, col]) => balls[row*ncols + col].ballContent === 0)
 	      .filter(([row, col]) => !balls[row*ncols + col].seed)
-	      .sort(() => Math.random() - 0.5)
+	      .sort(() => Math.random() - 0.5).sort(() => Math.random() - 0.5)	      
 	      .slice(0, num);
 
-	const randomValue = () => Math.floor(Math.random()*(images.length-1)) + 1;
-	targetPoints.forEach(([row, col]) => this.seedBall(row, col, randomValue()));
+	const getCounts = parity => pointsRowCol
+	      .filter(([row, col]) => (row + col)%2 === parity)
+	      .map(([row, col]) => balls[row*ncols + col])
+	      .filter(ball => ball.ballContent > 0 || ball.seed)
+	      .map(ball => (ball.ballContent === 0)? ball.seed.ballContent : ball.ballContent)
+	      .reduce((a, b) => ({...a, [b]: (a[b] || 0) + 1}), {});
+
+	const counts = [0, 1].reduce((a, b) => ({...a, [b]: getCounts(b)}), {});
+	const makeValue = (row, col) => {
+	    const sameCounts = counts[(row + col) % 2];
+	    const otherCounts = counts[(row + col + 1) % 2];
+
+	    const diffs = new Array(images.length).fill(0)
+		  .map((_, i) => (sameCounts[i] || 0) - (otherCounts[i] || 0));
+	    diffs[0] = Infinity;
+	    
+	    const choice = diffs
+		  .reduce((a, b, i) => {
+		if (b > a.value) { return a; }
+		if (b === a.value) { a.keys.push(i); return a}
+		if (b < a.value) { a.value = b; a.keys = [i]; return a}
+	    }, {keys: [], value: Infinity})
+		  .keys
+		  .sort(() => Math.random() - 0.5)[0];	    
+	    sameCounts[choice] = (sameCounts[choice] || 0) + 1;
+	    
+	    return choice;
+	};
+	// const randomValue = () => Math.floor(Math.random()*(images.length-1)) + 1;
+	targetPoints.forEach(([row, col]) => this.seedBall(row, col, makeValue(row, col)));
 	
 	return this;
     }
@@ -391,7 +419,7 @@ class LevelBase {
 
 	const {x, y} = balls[Math.floor(0.5*ncols)];
 
-	const counters = Object.entries({'heart': 10, 'dollar': 0, 'clock': 3, 'scul': 1})
+	const counters = Object.entries({heart: 3, dollar: 0, clock: 0, scul: 0})
 	      .map(([key, value], i) => {
 		  const counter = new Counter().set({
 		      scene,
@@ -736,7 +764,7 @@ export class LevelShariki {
 		await base.makeBoard();
 		await base.makeButtons();
 		await base.makeCounters();
-				
+		
 		return 's_start';
 	    },
 	    's_start': async () => {
@@ -754,31 +782,18 @@ export class LevelShariki {
 		
 		return 's_spawn';
 	    },
-	    's_spawn': async () => {
-		await timeout(600);
-		base.growAllSeeds(); // await?
-		base.seedRandomBalls(7);
-		return 's_kill';
-	    },
-	    's_twist': async () => {
-		if (base.getValue('heart') <= 0) {
-		    await timeout(1000);
-		    return 's_cleanup';
-		}
+	    's_twist': async () => {		
 		const result = await base.playerTurn();
-		if (result === 'twist') {		    		    
-		    if (base.getValue('clock') === 1) {
-			sculCounter += 1;
-			base.addToCounters({
-			    heart: -base.getValue('clock'),
-			    clock: 2,
-			    scul: (sculCounter%4) === 0,
-			});
-			return 's_spawn';
-		    }
-		    base.addToCounters({clock: -1});		    
-		}
-		return {'twist': 's_kill', 'back': 's_cleanup'}[result];
+		if (result === 'twist') { base.addToCounters({clock: -1}); }
+		return {'twist': 's_spawn', 'back': 's_cleanup'}[result];
+	    },
+	    's_spawn': async () => {
+		if (base.getValue('clock') <= 0) {
+		    await timeout(600);
+		    base.growAllSeeds(); // await?
+		    base.seedRandomBalls(7);
+		}		
+		return 's_kill';
 	    },
 	    's_kill': async () => {
 		const killables = base.getKillablePoints();
@@ -786,8 +801,25 @@ export class LevelShariki {
 		    await timeout(600);
 		    killables.forEach(([row, col]) => base.replaceBall(row, col, 0));
 		    base.addToCounters({heart: killables.length, dollar: killables.length});
-		}
-		return 's_twist';
+		}		
+		
+		return 's_takeDamage';
+	    },
+	    's_takeDamage': async () => {
+		if (base.getValue('clock') <= 0) {
+		    await timeout(600);
+		    base.addToCounters({
+			heart: -base.getValue('scul'),
+			clock: 3 - base.getValue('clock'),
+			scul: (sculCounter%2) === 0, // scul: 1,
+		    }); sculCounter += 1;
+		}		
+		return 's_checkDeath';
+	    },
+	    's_checkDeath': async () => {
+		if (base.getValue('heart') > 0) { return 's_twist'; }
+		await timeout(1000);
+		return 's_cleanup';
 	    },
 	    's_eyeClose': async () => {
 		await timeout(500);

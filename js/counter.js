@@ -41,7 +41,7 @@ export class Counter {
 	const deltaText = scene.newText(text.x, text.y-size, deltaString)
 	      .setScale(text.baseScale).setOrigin(0.5).setTint(0xffff00);
 
-	const newValue = value + delta;	
+	const newValue = value + delta; Object.assign(this.internal, {value: newValue});
 
 	await timeout(200);
 	text.setText(newValue);
@@ -57,8 +57,7 @@ export class Counter {
 	    ease: 'Cubic.easeOut',
 	    onComplete: () => deltaText.destroy(),
 	});
-
-	Object.assign(this.internal, {value: newValue});
+	
 	return this;
     }
     getEntities() {
