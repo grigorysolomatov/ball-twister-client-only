@@ -3,7 +3,7 @@ import { StateMachine } from './tools/state.js';
 import { PatternMaker } from './pattern-maker.js';
 import { Counter } from './counter.js';
 
-// Border bug, Undo
+// Undo
 
 { // Scribbles
     //const content = new PatternMaker(5, 3)
@@ -80,6 +80,19 @@ class LevelBase {
 	if (!yes) { sensors.forEach(sensor => sensor.disableInteractive()); }
 	return this;
     }
+    storeState() {
+	const {history=[], balls, heart, dollar, clock, scul} = this.internal;
+
+	const state = {
+	    ballContent: balls.map(ball => ball.ballContent),
+	    seed: balls.map(ball => ball.seed?.ballContent),
+	    ...['heart', 'dollar', 'clock', 'scul']
+		.reduce((obj, key) => { obj[key] = this.getValue(key); return obj}, {}),
+	};
+	history.push(state);
+	
+	return this;
+    }
     // -------------------------------------------------------------------------
     showHints(t) {
 	const {balls, hints} = this.internal;
@@ -100,6 +113,10 @@ class LevelBase {
 	return this;
     }
     twistBoard(row, col, angle) {
+	this.storeState();
+	return this._twistBoard(row, col, angle);
+    }
+    _twistBoard(row, col, angle) {
 	const {balls, pointsXY, nrows, ncols} = this.internal;
 	
 	if (({
@@ -513,7 +530,7 @@ class LevelBase {
 	return result;
     }
     async makeButtons() {
-	const {scene, eye: eyeImage} = this.external;
+	const {scene, eye: eyeImage, undo: undoImage} = this.external;
 	const {balls, height, width} = this.internal;
 
 	const menuStep = 50;	
@@ -544,9 +561,12 @@ class LevelBase {
 	    ease: 'Cubic.easeOut',
 	});	
 	
-	const eyeButton = scene.newSprite(...startXY, eyeImage).setDisplaySize(80, 40).setAlpha(0);		
+	const eyeButton = scene.newSprite(startXY[0]+50, startXY[1], eyeImage)
+	      .setDisplaySize(80, 40).setAlpha(0);
+	const undoButton = scene.newSprite(startXY[0]-50, startXY[1], undoImage)
+	      .setDisplaySize(50, 50).setAlpha(0);
 
-	this.internal = {...this.internal, startButton, backButton, eyeButton};
+	this.internal = {...this.internal, startButton, backButton, eyeButton, undoButton};
 	
 	return this;
     }
@@ -567,7 +587,7 @@ class LevelBase {
 	return choice;
     }
     async eyeOpen() {
-	const {eyeButton} = this.internal;
+	const {eyeButton, undoButton} = this.internal;
 	await eyeButton.setAlpha(1).setInteractive().tween({
 	    scaleY: {from: 0, to: eyeButton.scale},
 	    duration: 500,
@@ -575,6 +595,13 @@ class LevelBase {
 	});
 	eyeButton.on('pointerover', () => this.showHints(1));
 	eyeButton.on('pointerout', () => this.showHints(0));
+	// ---------------------------------------------------------------------
+	await undoButton.setAlpha(1).setInteractive().tween({
+	    scale: {from: 0, to: undoButton.scale},
+	    duration: 500,
+	    ease: 'Cubic.easeOut',
+	});
+	// ---------------------------------------------------------------------
 	return this;
     }
     async eyeClose() {
@@ -808,7 +835,7 @@ export class LevelShariki {
 			heart: payoff(killables.length),
 			dollar: payoff(killables.length),
 		    });
-		}		
+		}
 		
 		return 's_takeDamage';
 	    },

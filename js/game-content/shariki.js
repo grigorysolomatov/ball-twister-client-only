@@ -29,6 +29,7 @@ export const shariki = {
 	    images: ['gray', 'yellow', 'red', 'green', 'blue', 'pink'],
 	    sensor: 'sensor',
 	    eye: 'eye',
+	    undo: 'undo',
 	    trofe: 'trofe',
 	}),
     },

@@ -17,6 +17,7 @@ export const gameContent = {
 	    sensor: 'assets/misc/sensor.svg',
 	    trofe: 'assets/misc/trofe.png',
 	    eye: 'assets/misc/eye.svg',
+	    undo: 'assets/misc/undo.svg',
 
 	    heart: 'assets/counters/heart.svg',
 	    dollar: 'assets/counters/dollar.svg',
