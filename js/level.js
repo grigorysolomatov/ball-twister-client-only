@@ -114,9 +114,9 @@ class LevelBase {
     }
     twistBoard(row, col, angle) {
 	this.storeState();
-	return this._twistBoard(row, col, angle);
+	return this.twistBoardNoUndo(row, col, angle);
     }
-    _twistBoard(row, col, angle) {
+    twistBoardNoUndo(row, col, angle) {
 	const {balls, pointsXY, nrows, ncols} = this.internal;
 	
 	if (({
@@ -155,34 +155,6 @@ class LevelBase {
 	    });
 	});	
 	return true;
-    }
-    updateInfoText(text, inheritX=true) { // Experimental
-	const {infoText, width, balls} = this.internal;
-	const {scene} = this.external;
-
-	const menuStep = 50;	
-	let [x, y] = [0.5*width, balls[0].y - 1.5*menuStep];
-	const newInfoText = scene.newText(x, y, text).setOrigin(0.5);
-	
-	if (infoText) {
-	    y = infoText.y;
-	    if (inheritX) { x = 0.5*(newInfoText.width - infoText.width) + infoText.x; }	    
-	    newInfoText.setX(x).setY(y);
-	    infoText.tween({
-		alpha: 0,
-		duration: 200,
-		ease: 'Linear',
-		onComplete: () => infoText.destroy(),
-	    });	    
-	}	
-	newInfoText.tween({
-	    alpha: {from: 0, to: 1},
-	    duration: 200,
-	    ease: 'Linear',
-	});
-	
-	this.internal.infoText = newInfoText;
-	return this;
     }
     // -------------------------------------------------------------------------
     replaceBall(row, col, k) {
@@ -227,18 +199,6 @@ class LevelBase {
     }
     getValue(key) {
 	return this.internal[key].getValue();
-    }
-    spawnRandomBall() { // DELETE?
-	const {images} = this.external;
-	const {balls, nrows, ncols, pointsRowCol} = this.internal;
-
-	const emptySpots = pointsRowCol.filter(([row, col]) => balls[row*ncols + col].ballContent === 0);
-	const [row, col] = emptySpots[Math.floor(Math.random()*emptySpots.length)];
-	const value = Math.floor(Math.random()*(images.length-1)) + 1;
-
-	this.replaceBall(row, col, value);
-	
-	return this;
     }
     seedBall(row, col, k) {
 	const {scene, images} = this.external;
@@ -308,20 +268,7 @@ class LevelBase {
 	const uniqueToKill = [...new Set(toKill.map(([row, col]) => `${row} ${col}`))]
 	      .map(s => s.split(' ').map(x => Number(x)));
 	return uniqueToKill;
-    }
-    seedRandomBall() {
-	const {images} = this.external;
-	const {balls, nrows, ncols, pointsRowCol} = this.internal;
-
-	const canSeed = ball => (ball.ballContent === 0) && !ball.seed;
-	const emptySpots = pointsRowCol.filter(([row, col]) => canSeed(balls[row*ncols + col]));
-	const [row, col] = emptySpots[Math.floor(Math.random()*emptySpots.length)];
-	const value = Math.floor(Math.random()*(images.length-1)) + 1;
-
-	this.seedBall(row, col, value);
-	
-	return this;
-    }
+    }    
     seedRandomBalls(num) {
 	const {images} = this.external;
 	const {balls, nrows, ncols, pointsRowCol} = this.internal;
@@ -340,7 +287,7 @@ class LevelBase {
 	      .filter(ball => ball.ballContent > 0 || ball.seed)
 	      .map(ball => (ball.ballContent === 0)? ball.seed.ballContent : ball.ballContent)
 	      .reduce((obj, key) => Object.assign(obj, {[key]: (obj[key] || 0) + 1}), {});
-
+	
 	const counts = [0, 1].reduce((obj, key) => Object.assign(obj, {[key]: getCounts(key)}), {});
 	const makeValue = (row, col) => {
 	    const sameCounts = counts[(row + col) % 2];
@@ -367,7 +314,61 @@ class LevelBase {
 	
 	return this;
     }
-    seedRandomBallSmart() {
+    // -------------------------------------------------------------------------
+    updateInfoText(text, inheritX=true) { // DELETE?
+	const {infoText, width, balls} = this.internal;
+	const {scene} = this.external;
+
+	const menuStep = 50;	
+	let [x, y] = [0.5*width, balls[0].y - 1.5*menuStep];
+	const newInfoText = scene.newText(x, y, text).setOrigin(0.5);
+	
+	if (infoText) {
+	    y = infoText.y;
+	    if (inheritX) { x = 0.5*(newInfoText.width - infoText.width) + infoText.x; }	    
+	    newInfoText.setX(x).setY(y);
+	    infoText.tween({
+		alpha: 0,
+		duration: 200,
+		ease: 'Linear',
+		onComplete: () => infoText.destroy(),
+	    });	    
+	}	
+	newInfoText.tween({
+	    alpha: {from: 0, to: 1},
+	    duration: 200,
+	    ease: 'Linear',
+	});
+	
+	this.internal.infoText = newInfoText;
+	return this;
+    }
+    spawnRandomBall() { // DELETE?
+	const {images} = this.external;
+	const {balls, nrows, ncols, pointsRowCol} = this.internal;
+
+	const emptySpots = pointsRowCol.filter(([row, col]) => balls[row*ncols + col].ballContent === 0);
+	const [row, col] = emptySpots[Math.floor(Math.random()*emptySpots.length)];
+	const value = Math.floor(Math.random()*(images.length-1)) + 1;
+
+	this.replaceBall(row, col, value);
+	
+	return this;
+    }
+    seedRandomBall() { // DELETE?
+	const {images} = this.external;
+	const {balls, nrows, ncols, pointsRowCol} = this.internal;
+
+	const canSeed = ball => (ball.ballContent === 0) && !ball.seed;
+	const emptySpots = pointsRowCol.filter(([row, col]) => canSeed(balls[row*ncols + col]));
+	const [row, col] = emptySpots[Math.floor(Math.random()*emptySpots.length)];
+	const value = Math.floor(Math.random()*(images.length-1)) + 1;
+
+	this.seedBall(row, col, value);
+	
+	return this;
+    }
+    seedRandomBallSmart() { // DELETE
 	return this.seedRandomBall();
 	// ---------------------------------------------------------------------
 	const {images} = this.external;
