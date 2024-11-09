@@ -87,7 +87,7 @@ class LevelBase {
 	    ballContent: balls.map(ball => ball.ballContent),
 	    seed: balls.map(ball => ball.seed?.ballContent),
 	    ...['heart', 'dollar', 'clock', 'scul']
-		.reduce((obj, key) => { obj[key] = this.getValue(key); return obj}, {}),
+		.reduce((obj, key) => Object.assign(obj, {[key]: this.getValue(key)}), {}),
 	};
 	history.push(state);
 	
@@ -339,9 +339,9 @@ class LevelBase {
 	      .map(([row, col]) => balls[row*ncols + col])
 	      .filter(ball => ball.ballContent > 0 || ball.seed)
 	      .map(ball => (ball.ballContent === 0)? ball.seed.ballContent : ball.ballContent)
-	      .reduce((a, b) => ({...a, [b]: (a[b] || 0) + 1}), {});
+	      .reduce((obj, key) => Object.assign(obj, {[key]: (obj[key] || 0) + 1}), {});
 
-	const counts = [0, 1].reduce((a, b) => ({...a, [b]: getCounts(b)}), {});
+	const counts = [0, 1].reduce((obj, key) => Object.assign(obj, {[key]: getCounts(key)}), {});
 	const makeValue = (row, col) => {
 	    const sameCounts = counts[(row + col) % 2];
 	    const otherCounts = counts[(row + col + 1) % 2];
@@ -352,10 +352,10 @@ class LevelBase {
 	    
 	    const choice = diffs
 		  .reduce((a, b, i) => {
-		if (b > a.value) { return a; }
-		if (b === a.value) { a.keys.push(i); return a}
-		if (b < a.value) { a.value = b; a.keys = [i]; return a}
-	    }, {keys: [], value: Infinity})
+		      if (b > a.value) { return a; }
+		      if (b === a.value) { a.keys.push(i); return a}
+		      if (b < a.value) { a.value = b; a.keys = [i]; return a}
+		  }, {keys: [], value: Infinity})
 		  .keys
 		  .sort(() => Math.random() - 0.5)[0];	    
 	    sameCounts[choice] = (sameCounts[choice] || 0) + 1;
@@ -452,7 +452,7 @@ class LevelBase {
 		  });		  
 		  return {[key]: counter};
 	      })
-	      .reduce((a, b) => ({...a, ...b}), {});
+	      .reduce((obj, entry) => Object.assign(obj, entry), {});
 	Object.keys(counters).forEach(async (key, i) => {
 	    await timeout(50*i);
 	    await counters[key].create();	    
