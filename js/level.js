@@ -3,6 +3,8 @@ import { StateMachine } from './tools/state.js';
 import { PatternMaker } from './pattern-maker.js';
 import { Counter } from './counter.js';
 
+// Border bug, Undo
+
 { // Scribbles
     //const content = new PatternMaker(5, 3)
     //      .draw(0, 0, [[1], [2], [3]])
@@ -500,8 +502,7 @@ class LevelBase {
 		    new Promise(resolve => setTimeout(() => resolve(-2), 200)),
 		    new Promise(resolve => sensor.on('pointerup', () => resolve(2))),
 		]);
-		this.twistBoard(row, col, angle);
-		resolve('twist');
+		if (this.twistBoard(row, col, angle)) { resolve('twist'); }
 	    });
 	}));
 	const p_back = new Promise(resolve => {
@@ -784,7 +785,7 @@ export class LevelShariki {
 		
 		return 's_spawn';
 	    },
-	    's_twist': async () => {		
+	    's_twist': async () => {
 		const result = await base.playerTurn();
 		if (result === 'twist') { base.addToCounters({clock: -1}); }
 		return {'twist': 's_spawn', 'back': 's_cleanup'}[result];
