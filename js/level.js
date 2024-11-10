@@ -198,7 +198,7 @@ class LevelBase {
 	return this;
     }
     getValue(key) {
-	return this.internal[key].getValue();
+	return this.internal[key]?.getValue();
     }
     seedBall(row, col, k) {
 	const {scene, images} = this.external;
@@ -590,7 +590,7 @@ class LevelBase {
     }
     async eyeOpen() {
 	const {eyeButton, undoButton} = this.internal;
-	await eyeButton.setAlpha(0).setInteractive().tween({
+	await eyeButton.setAlpha(1).setInteractive().tween({
 	    scaleY: {from: 0, to: eyeButton.scale},
 	    duration: 500,
 	    ease: 'Cubic.easeOut',
@@ -598,7 +598,7 @@ class LevelBase {
 	eyeButton.on('pointerover', () => this.showHints(1));
 	eyeButton.on('pointerout', () => this.showHints(0));
 	// ---------------------------------------------------------------------
-	await undoButton.setAlpha(1).setInteractive().tween({
+	await undoButton.setAlpha(0).setInteractive().tween({
 	    scale: {from: 0, to: undoButton.scale},
 	    duration: 500,
 	    ease: 'Cubic.easeOut',
@@ -680,7 +680,7 @@ class LevelBase {
 	    ...this.internal.balls.filter(ball => ball.seed).map(ball => ball.seed),
 	    ...this.internal.sensors,
 	    ...['heart', 'dollar', 'clock', 'scul']
-		.map(key => this.internal[key].getEntities())
+		.map(key => this.internal[key]?.getEntities())
 		.flatMap(x => x),
 	    ...['rewardImage', 'rewardText', 'submitText',
 		'startButton', 'backButton', 'eyeButton', 'undoButton',
