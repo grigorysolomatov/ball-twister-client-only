@@ -441,14 +441,15 @@ class LevelBase {
 
 	const {x, y} = balls[Math.floor(0.5*ncols)];
 
-	const counters = Object.entries({heart: 10, dollar: 0, clock: 0, scul: 0})
+	const initialValues = {heart: 10, dollar: 0, clock: 0, scul: 0}; // , mult: 1
+	const counters = Object.entries(initialValues)
 	      .map(([key, value], i) => {
 		  const counter = new Counter().set({
 		      scene,
 		      image: key,
 		      value,
 		      size: 25,
-		      x: x + step*(i-1.5),
+		      x: x + step*(i-0.5*(Object.keys(initialValues).length-1)),
 		      y: y - 1.2*step,
 		  });		  
 		  return {[key]: counter};
@@ -562,9 +563,9 @@ class LevelBase {
 	    ease: 'Cubic.easeOut',
 	});	
 	
-	const eyeButton = scene.newSprite(startXY[0]+50, startXY[1], eyeImage)
+	const eyeButton = scene.newSprite(startXY[0], startXY[1], eyeImage)
 	      .setDisplaySize(80, 40).setAlpha(0);
-	const undoButton = scene.newSprite(startXY[0]-50, startXY[1], undoImage)
+	const undoButton = scene.newSprite(startXY[0], startXY[1], undoImage)
 	      .setDisplaySize(50, 50).setAlpha(0);
 
 	this.internal = {...this.internal, startButton, backButton, eyeButton, undoButton};
@@ -589,7 +590,7 @@ class LevelBase {
     }
     async eyeOpen() {
 	const {eyeButton, undoButton} = this.internal;
-	await eyeButton.setAlpha(1).setInteractive().tween({
+	await eyeButton.setAlpha(0).setInteractive().tween({
 	    scaleY: {from: 0, to: eyeButton.scale},
 	    duration: 500,
 	    ease: 'Cubic.easeOut',

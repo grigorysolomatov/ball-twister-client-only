@@ -23,6 +23,7 @@ export const gameContent = {
 	    dollar: 'assets/counters/dollar.svg',
 	    scul: 'assets/counters/scul.svg',
 	    clock: 'assets/counters/clock.svg',
+	    mult: 'assets/counters/mult.svg',
 	});
 	
 	const {height, width} = scene.game.config;
