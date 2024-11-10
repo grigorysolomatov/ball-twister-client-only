@@ -682,7 +682,7 @@ class LevelBase {
 		.map(key => this.internal[key].getEntities())
 		.flatMap(x => x),
 	    ...['rewardImage', 'rewardText', 'submitText',
-		'startButton', 'backButton', 'eyeButton',
+		'startButton', 'backButton', 'eyeButton', 'undoButton',
 		'infoText']
 		.map(key => this.internal[key]),
 	];
