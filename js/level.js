@@ -831,7 +831,8 @@ export class LevelShariki {
 		if (killables.length > 0) {
 		    await timeout(600);
 		    killables.forEach(([row, col]) => base.replaceBall(row, col, 0));
-		    const payoff = x => Math.ceil(3*(x/3)**2);
+		    // const payoff = x => Math.ceil(3*(x/3)**2);
+		    const payoff = x => x;
 		    base.addToCounters({
 			heart: payoff(killables.length),
 			dollar: payoff(killables.length),
@@ -846,8 +847,8 @@ export class LevelShariki {
 		    base.addToCounters({
 			heart: -base.getValue('scul'),
 			clock: 3 - base.getValue('clock'),
-			scul: 1,
-			// scul: (sculCounter%2) === 0,
+			//scul: 1,
+			scul: (sculCounter%2) === 0,
 		    }); sculCounter += 1;
 		}		
 		return 's_checkDeath';
