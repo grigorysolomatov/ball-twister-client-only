@@ -90,6 +90,51 @@ class LevelBase {
 		.reduce((obj, key) => Object.assign(obj, {[key]: this.getValue(key)}), {}),
 	};
 	history.push(state);
+
+	history.splice(0, history.length-50);
+
+	Object.assign(this.internal, {history});	
+	return this;
+    }
+    undo() {
+	const {scene, images} = this.external;
+	const {history, balls, nrows, ncols, heart, dollar, clock, scul} = this.internal;
+
+	if (history.length === 0) {return this;}
+
+	const state = history.pop();
+	const newBalls = this.makeSpriteGrid((row, col) => images[state.ballContent[row*ncols + col]]);
+	newBalls.forEach((ball, i) => {
+	    ball.baseScale = balls[i].baseScale;
+	    ball.setScale(ball.baseScale);
+	    ball.ballContent = state.ballContent[i];
+	});
+
+	balls.map(async ball => {
+	    ball.seed?.setDepth(999).tween({
+		alpha: 0,
+		duration: 500,
+		ease: 'Cubic.easeOut',
+	    });
+	    await ball.setDepth(999).tween({
+		alpha: 0,
+		duration: 500,
+		ease: 'Cubic.easeOut',
+	    });
+	    ball.seed?.destroy();
+	    ball.destroy();	    
+	});
+	balls.splice(0, balls.length, ...newBalls);
+	balls.forEach((ball, i) => {
+	    const [row, col] = [Math.floor(i/ncols), i%ncols];
+	    if (state.seed[i]) { this.seedBall(row, col, state.seed[i]); }
+	});
+
+	const counters = {heart, dollar, clock, scul};
+	const counterDeltas = Object.keys(counters)
+	      .map(key => ({[key]: state[key] - this.getValue(key)}))
+	      .reduce((obj, key) => Object.assign(obj, key), {});
+	this.addToCounters(counterDeltas);
 	
 	return this;
     }
@@ -200,7 +245,7 @@ class LevelBase {
     getValue(key) {
 	return this.internal[key]?.getValue();
     }
-    seedBall(row, col, k) {
+    seedBall(row, col, k, animate) {
 	const {scene, images} = this.external;
 	const {balls, nrows, ncols} = this.internal;
 
@@ -214,11 +259,10 @@ class LevelBase {
 	});
 	
 	const follow = () => { seedBall.x = targetBall.x; seedBall.y = targetBall.y;}
-	targetBall.seed = seedBall;
+	targetBall.seed = seedBall;	
 	seedBall.grow = () => {
 	    scene.events.off('update', follow);
-	    seedBall.baseScale = targetBall.baseScale;
-	    seedBall.ballContent = k;
+	    seedBall.baseScale = targetBall.baseScale;	    
 	    targetBall.tween({
 		alpha: 0,
 		scale: 1.4*targetBall.scale,
@@ -232,11 +276,11 @@ class LevelBase {
 		duration: 500,
 		ease: 'Cubic.easeOut',
 	    });
-	}	
+	}; seedBall.ballContent = k;
 	scene.events.on('update', follow);
 	
 	return this;
-    }    
+    }
     growAllSeeds() {
 	const {balls} = this.internal;
 	balls.map((_, i) => i).forEach(i => {
@@ -248,7 +292,7 @@ class LevelBase {
 	});
     }
     getKillablePoints() {
-	const {balls, nrows, ncols, pointsRowCol} = this.internal;	
+	const {balls, nrows, ncols, pointsRowCol} = this.internal;
 	const toKill = [];
 	const getBall = (r, c) => (r < nrows && c < ncols)? balls[r*ncols + c] : null;
 	pointsRowCol.forEach(([row, col]) => {
@@ -563,9 +607,9 @@ class LevelBase {
 	    ease: 'Cubic.easeOut',
 	});	
 	
-	const eyeButton = scene.newSprite(startXY[0], startXY[1], eyeImage)
+	const eyeButton = scene.newSprite(startXY[0] + 50, startXY[1], eyeImage)
 	      .setDisplaySize(80, 40).setAlpha(0);
-	const undoButton = scene.newSprite(startXY[0], startXY[1], undoImage)
+	const undoButton = scene.newSprite(startXY[0] - 50, startXY[1], undoImage)
 	      .setDisplaySize(50, 50).setAlpha(0);
 
 	this.internal = {...this.internal, startButton, backButton, eyeButton, undoButton};
@@ -598,11 +642,12 @@ class LevelBase {
 	eyeButton.on('pointerover', () => this.showHints(1));
 	eyeButton.on('pointerout', () => this.showHints(0));
 	// ---------------------------------------------------------------------
-	await undoButton.setAlpha(0).setInteractive().tween({
+	await undoButton.setAlpha(1).setInteractive().tween({
 	    scale: {from: 0, to: undoButton.scale},
 	    duration: 500,
 	    ease: 'Cubic.easeOut',
 	});
+	undoButton.on('pointerup', () => this.undo());
 	// ---------------------------------------------------------------------
 	return this;
     }
@@ -824,7 +869,7 @@ export class LevelShariki {
 		    await timeout(600);
 		    base.growAllSeeds(); // await?
 		    base.seedRandomBalls(7);
-		}		
+		}
 		return 's_kill';
 	    },
 	    's_kill': async () => {
