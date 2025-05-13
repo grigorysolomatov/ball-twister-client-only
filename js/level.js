@@ -652,7 +652,7 @@ class LevelBase {
 	return this;
     }
     async eyeClose() {
-	const {eyeButton, backButton} = this.internal;
+	const {eyeButton, backButton, undoButton} = this.internal;
 	backButton.tween({
 	    alpha: 0,
 	    duration: 250,
@@ -661,6 +661,11 @@ class LevelBase {
 	await eyeButton.disableInteractive().tween({
 	    scaleY: 0,
 	    alpha: 0,
+	    duration: 500,
+	    ease: 'Cubic.easeOut',
+	});
+	await undoButton.disableInteractive().tween({
+	    scale: 0,
 	    duration: 500,
 	    ease: 'Cubic.easeOut',
 	});
