@@ -657,7 +657,7 @@ class LevelBase {
 	    alpha: 0,
 	    duration: 250,
 	    ease: 'Cubic.easeOut',
-	});	
+	});
 	undoButton.disableInteractive().tween({
 	    scale: 0,
 	    duration: 500,
